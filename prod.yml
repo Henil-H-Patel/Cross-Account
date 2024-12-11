@@ -1,49 +1,49 @@
-version: 0.2
+# version: 0.2
 
-phases:
-  install:
-    runtime-versions:
-      nodejs: 18
-    commands:
-      # Install Terraform
-      - echo "Installing Terraform"
-      - wget https://releases.hashicorp.com/terraform/1.5.2/terraform_1.5.2_linux_amd64.zip
-      - unzip terraform_1.5.2_linux_amd64.zip
-      - sudo mv terraform /usr/local/bin/
-      - terraform --version # Verify Terraform installation
+# phases:
+#   install:
+#     runtime-versions:
+#       nodejs: 18
+#     commands:
+#       # Install Terraform
+#       - echo "Installing Terraform"
+#       - wget https://releases.hashicorp.com/terraform/1.5.2/terraform_1.5.2_linux_amd64.zip
+#       - unzip terraform_1.5.2_linux_amd64.zip
+#       - sudo mv terraform /usr/local/bin/
+#       - terraform --version # Verify Terraform installation
 
-  build:
-    commands:
-      # Set environment variables
-      # - export TF_VAR_domain_name=${DOMAIN_NAME}
-      # - export TF_VAR_alternative_name=${ALTERNATIVE_NAME}
-      # - export TF_VAR_dev_subnet = ${dev_subnet}
-      - export TF_VAR_private_subnet_1a=${PRIVATE_SUBNET_1A}
-      - export TF_VAR_private_subnet_1b=${PRIVATE_SUBNET_1B}
-      # - export TF_VAR_public_subnet_az1_cidr=${PUBLIC_SUBNET_AZ1_CIDR}
-      # - export TF_VAR_public_subnet_az2_cidr=${PUBLIC_SUBNET_AZ2_CIDR}
-      - export TF_VAR_public_subnet_1a=${PUBLIC_SUBNET_1A}
-      - export TF_VAR_public_subnet_1b=${PUBLIC_SUBNET_1B}
-      - export TF_VAR_region_name=${REGION_NAME}
-      - export TF_VAR_vpc_cidr=${VPC_CIDR}
-      - export TF_VAR_STAGE=${STAGE}
-      # - export TF_VAR_domain_name=${DOMAIN_NAME}
-      # - export TF_VAR_alternative_name=${ALTERNATIVE_NAME}
-      - export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" $(aws sts assume-role --role-arn arn:aws:iam::820725807821:role/cross_account-Prod-vpc --role-session-name MySessionName --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" --output text))
+#   build:
+#     commands:
+#       # Set environment variables
+#       # - export TF_VAR_domain_name=${DOMAIN_NAME}
+#       # - export TF_VAR_alternative_name=${ALTERNATIVE_NAME}
+#       # - export TF_VAR_dev_subnet = ${dev_subnet}
+#       - export TF_VAR_private_subnet_1a=${PRIVATE_SUBNET_1A}
+#       - export TF_VAR_private_subnet_1b=${PRIVATE_SUBNET_1B}
+#       # - export TF_VAR_public_subnet_az1_cidr=${PUBLIC_SUBNET_AZ1_CIDR}
+#       # - export TF_VAR_public_subnet_az2_cidr=${PUBLIC_SUBNET_AZ2_CIDR}
+#       - export TF_VAR_public_subnet_1a=${PUBLIC_SUBNET_1A}
+#       - export TF_VAR_public_subnet_1b=${PUBLIC_SUBNET_1B}
+#       - export TF_VAR_region_name=${REGION_NAME}
+#       - export TF_VAR_vpc_cidr=${VPC_CIDR}
+#       - export TF_VAR_STAGE=${STAGE}
+#       # - export TF_VAR_domain_name=${DOMAIN_NAME}
+#       # - export TF_VAR_alternative_name=${ALTERNATIVE_NAME}
+#       - export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" $(aws sts assume-role --role-arn arn:aws:iam::820725807821:role/cross_account-Prod-vpc --role-session-name MySessionName --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" --output text))
 
-      # Terraform initialization and plan
-      - echo "Running Terraform init"
-      - echo "Running Terraform plan for the ${STAGE} stage"
-      - terraform --version
-      - terraform init -reconfigure -backend-config="key=${STAGE}/terraform.tfstate"
-      - terraform plan
-      # Uncomment the following line if you want to destroy resources
-      # - terraform destroy -auto-approve
+#       # Terraform initialization and plan
+#       - echo "Running Terraform init"
+#       - echo "Running Terraform plan for the ${STAGE} stage"
+#       - terraform --version
+#       - terraform init -reconfigure -backend-config="key=${STAGE}/terraform.tfstate"
+#       - terraform plan
+#       # Uncomment the following line if you want to destroy resources
+#       # - terraform destroy -auto-approve
 
-  post_build:
-    commands:
-      # Apply Terraform changes
-      - echo "Running Terraform apply"
-      - terraform apply  -var="region_name=${REGION_NAME}" -var="vpc_cidr=${VPC_CIDR}" -var="private_subnet_1a=${PRIVATE_SUBNET_1A}" -var="private_subnet_1b=${PRIVATE_SUBNET_1B}" -var="public_subnet_1a=${PUBLIC_SUBNET_1A}" -var="public_subnet_1b=${PUBLIC_SUBNET_1B}" -var="STAGE=${STAGE}"  -auto-approve
+#   post_build:
+#     commands:
+#       # Apply Terraform changes
+#       - echo "Running Terraform apply"
+#       - terraform apply  -var="region_name=${REGION_NAME}" -var="vpc_cidr=${VPC_CIDR}" -var="private_subnet_1a=${PRIVATE_SUBNET_1A}" -var="private_subnet_1b=${PRIVATE_SUBNET_1B}" -var="public_subnet_1a=${PUBLIC_SUBNET_1A}" -var="public_subnet_1b=${PUBLIC_SUBNET_1B}" -var="STAGE=${STAGE}"  -auto-approve
 
 
