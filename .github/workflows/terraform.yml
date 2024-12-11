@@ -6,12 +6,9 @@ on:
     - main
 
 jobs:
-  deploy:
-    name: Terraform Deploy
+  terraform-init-plan:
+    name: Terraform Init and Plan
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        environment: [ development, production ]
 
     steps:
     - name: Checkout Code
@@ -22,27 +19,60 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Configure AWS Credentials
+    - name: Configure AWS Credentials for Development
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-      if: matrix.environment == 'development'
+      run: |
+        echo "AWS credentials configured for Development."
 
-    - name: Configure AWS Credentials
+    - name: Terraform Init
+      working-directory: environments/development
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: environments/development
+      run: terraform plan -out=tfplan
+
+  approval:
+    name: Approval for Production Deployment
+    needs: terraform-init-plan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Wait for Manual Approval
+      uses: hmarr/auto-approve-action@v1
+      with:
+        approval_prompt: |
+          Please approve the deployment to the production environment.
+          Changes will be applied using the Terraform plan.
+        timeout_minutes: 30
+
+  terraform-apply-production:
+    name: Deploy to Production
+    needs: approval
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Configure AWS Credentials for Production
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-      if: matrix.environment == 'production'
+      run: |
+        echo "AWS credentials configured for Production."
 
     - name: Terraform Init
-      run: terraform init -backend-config="key=${{ matrix.environment }}/terraform.tfstate"
+      working-directory: environments/production
+      run: terraform init
 
-    - name: Terraform Plan
-      run: terraform plan -var-file=${{ matrix.environment }}.tfvars
-
-    - name: Terraform Apply with Approval
-      run: |
-        if [ "${{ matrix.environment }}" == "production" ]; then
-          terraform apply -var-file=${{ matrix.environment }}.tfvars -auto-approve
-        else
-          terraform apply -var-file=${{ matrix.environment }}.tfvars
+    - name: Apply Terraform Plan
+      working-directory: environments/production
+      run: terraform apply -auto-approve tfplan
