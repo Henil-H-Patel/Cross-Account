@@ -26,6 +26,7 @@ jobs:
       run: |
         echo "AWS_ACCESS_KEY_ID is set to: $AWS_ACCESS_KEY_ID"
         echo "AWS_ACCESS_KEY_ID is set, but SECRET is not printed for security."
+        env | grep AWS
 
     - name: Terraform Init
       working-directory: .
