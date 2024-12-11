@@ -58,8 +58,8 @@ module "route-table" {
 module "route-table-routes" {
     source = "./modules/stage/route-table-routes"
     nat_gateway = module.nat-gateway.nat_gateway
-    habemco-qa-rtb-private = module.route-table.habemco-qa-rtb-private
-    habemco-qa-rtb-public = module.route-table.habemco-qa-rtb-public
+    GMS-qa-rtb-private = module.route-table.GMS-qa-rtb-private
+    GMS-qa-rtb-public = module.route-table.GMS-qa-rtb-public
     internet_gateway = module.internet-gateway.internet_gateway
     
   

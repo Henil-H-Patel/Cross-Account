@@ -4,7 +4,7 @@ resource "aws_route_table" "private-subnet-1a" {
   vpc_id = var.vpc_id
   
   tags = {
-    Name = "habemco-qa-rtb-private"
+    Name = "GMS-qa-rtb-private"
   }
 }
 
@@ -36,7 +36,7 @@ resource "aws_route_table" "Public-subnet" {
   vpc_id = var.vpc_id
   
   tags = {
-    Name = "habemco-qa-rtb-public"
+    Name = "GMS-qa-rtb-public"
   }
 }
 

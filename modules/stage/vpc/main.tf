@@ -3,7 +3,7 @@ resource "aws_vpc" "vpc" {
   # Other VPC configuration options
 
   tags = {
-    Name = "habemco-qa-vpc"  
+    Name = "GMS-qa-vpc"  
   }
 }
 
@@ -17,7 +17,7 @@ resource "aws_subnet" "private-subnet-1a" {
   map_public_ip_on_launch = false            # map_public_ip_on_launch is set to false, instances launched in this subnet will not be assigned a public IP address by default. This is commonly used for private subnets where you don't want instances to have direct internet access.
 
   tags = {
-    Name ="habemco-qa-subnet-private1-us-west-2a"
+    Name ="GMS-qa-subnet-private1-us-west-2a"
   }
 }
 
@@ -31,7 +31,7 @@ resource "aws_subnet" "private-subnet-1b" {
   map_public_ip_on_launch = false            # map_public_ip_on_launch is set to false, instances launched in this subnet will not be assigned a public IP address by default. This is commonly used for private subnets where you don't want instances to have direct internet access.
 
   tags = {
-    Name ="habemco-qa-subnet-private1-us-west-2b"
+    Name ="GMS-qa-subnet-private1-us-west-2b"
   }
 }
 
@@ -48,7 +48,7 @@ resource "aws_subnet" "public-subnet-1a" {
   map_public_ip_on_launch = false # This allows instances launched in this subnet to receive public IP addresses.
 
   tags = {
-    Name = "habemco-qa--subnet-public1-us-west-2a"
+    Name = "GMS-qa--subnet-public1-us-west-2a"
   }
 }
 
@@ -61,7 +61,7 @@ resource "aws_subnet" "public-subnet-1b" {
   map_public_ip_on_launch = false # This allows instances launched in this subnet to receive public IP addresses.
 
   tags = {
-    Name = "habemco-qa-subnet-public2-us-west-2b"
+    Name = "GMS-qa-subnet-public2-us-west-2b"
   }
 }
 

@@ -43,11 +43,11 @@ variable "nat_gateway" {
 }
 
 
-variable "habemco-qa-rtb-public" {
+variable "GMS-qa-rtb-public" {
   
 }
 
-variable "habemco-qa-rtb-private" {
+variable "GMS-qa-rtb-private" {
   
 }
 

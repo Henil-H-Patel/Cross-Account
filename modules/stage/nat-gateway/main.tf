@@ -11,6 +11,6 @@ resource "aws_nat_gateway" "nat_gateway" {
   subnet_id     = var.public_subnet-1a # Replace with the actual public subnet ID
 
   tags = {
-    Name = "habemco-qa-nat-public1-us-west-2a"
+    Name = "GMS-qa-nat-public1-us-west-2a"
   }
 }
