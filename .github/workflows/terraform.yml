@@ -27,11 +27,11 @@ jobs:
         echo "AWS credentials configured for Development."
 
     - name: Terraform Init
-      working-directory: environments/development
+      working-directory: .
       run: terraform init
 
     - name: Terraform Plan
-      working-directory: environments/development
+      working-directory: .
       run: terraform plan -out=tfplan
 
   approval:
@@ -70,9 +70,9 @@ jobs:
         echo "AWS credentials configured for Production."
 
     - name: Terraform Init
-      working-directory: environments/production
+      working-directory: .
       run: terraform init
 
     - name: Apply Terraform Plan
-      working-directory: environments/production
+      working-directory: .
       run: terraform apply -auto-approve tfplan
