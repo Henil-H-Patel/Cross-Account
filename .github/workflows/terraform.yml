@@ -23,11 +23,9 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION_DEV }}
       run: |
-        # Debugging line
-        echo "AWS credentials configured for Development."
-        echo "AWS_ACCESS_KEY_ID is set to: ${AWS_ACCESS_KEY_ID:0:4}****"  # Mask part of the access key to avoid exposing secrets
+        echo "AWS_ACCESS_KEY_ID is set to: $AWS_ACCESS_KEY_ID"
+        echo "AWS_ACCESS_KEY_ID is set, but SECRET is not printed for security."
 
     - name: Terraform Init
       working-directory: .
@@ -69,9 +67,9 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
-        AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION_PROD }}
       run: |
-        echo "AWS credentials configured for Production."
+        echo "AWS_ACCESS_KEY_ID is set to: $AWS_ACCESS_KEY_ID"
+        echo "AWS_ACCESS_KEY_ID is set, but SECRET is not printed for security."
 
     - name: Terraform Init
       working-directory: .
