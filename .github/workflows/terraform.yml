@@ -5,7 +5,7 @@ on:
     branches:
     - main
   workflow_run:
-    workflows: [ "Terraform CI/CD Pipeline" ] # Make sure this matches your workflow name for dependency jobs
+    workflows: [ "terraform-init-plan-production" ] # Make sure this matches your workflow name for dependency jobs
     types:
     - completed
 
