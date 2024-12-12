@@ -6,7 +6,7 @@ on:
     - main
 
 jobs:
-  terraform-init-plan-development:
+  terraform-init-plan:
     name: Terraform Init and Plan (Development)
     runs-on: ubuntu-latest
 
