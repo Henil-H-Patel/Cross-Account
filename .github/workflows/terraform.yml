@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # Allow triggering manually from GitHub UI
 
 jobs:
   terraform-init-plan:
@@ -12,38 +11,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
 
-    - name: Configure AWS credentials for Development
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: AKIAQ3EGTMUFJ6OTA2EQ
-        aws-secret-access-key: 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
-        aws-region: us-west-2
+      - name: Configure AWS credentials for Development
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
 
-    - name: Terraform Init
-      working-directory: .
-      run: terraform init
+      - name: Terraform Init
+        run: terraform init
 
-    - name: Terraform Plan
-      working-directory: .
-      run: terraform plan -out=tfplan
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
   approval-apply:
     name: Approval for Terraform Apply
     needs: terraform-init-plan
     runs-on: ubuntu-latest
+    environment:
+      name: approval
+      url: https://github.com/${{ github.repository }}/environments/approval
+
     steps:
-      - name: Wait for Manual Approval to Apply
-        run: |
-          echo "Please approve this step to continue with Terraform Apply."
-          # You can wait for the user to approve manually via workflow_dispatch
+      - name: Wait for Manual Approval
+        run: echo "Waiting for manual approval to apply the Terraform plan."
 
   terraform-apply:
     name: Terraform Apply
@@ -51,73 +50,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
 
-    - name: Configure AWS credentials for Development
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: AKIAQ3EGTMUFJ6OTA2EQ
-        aws-secret-access-key: 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
-        aws-region: us-west-2
+      - name: Configure AWS credentials for Development
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
 
-    - name: Terraform Init
-      working-directory: .
-      run: terraform init
+      - name: Terraform Init
+        run: terraform init
 
-    - name: Terraform Apply
-      working-directory: .
-      run: terraform apply -auto-approve tfplan
-
-  approval-destroy:
-    name: Approval for Terraform Destroy
-    needs: terraform-apply
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for Manual Approval to Destroy
-        run: |
-          echo "Please approve this step to continue with Terraform Destroy."
-          # Another manual approval here
-
-  terraform-destroy:
-    name: Terraform Destroy
-    needs: approval-destroy
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
-
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
-
-    - name: Configure AWS credentials for Development
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: AKIAQ3EGTMUFJ6OTA2EQ
-        aws-secret-access-key: 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
-        aws-region: us-west-2
-
-    - name: Terraform Init
-      working-directory: .
-      run: terraform init
-
-    - name: Terraform Destroy
-      working-directory: .
-      run: terraform destroy -auto-approve
-
-  approval-prod-deployment:
-    name: Approval for Production Deployment
-    needs: terraform-destroy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for Manual Approval to Deploy to Production
-        run: |
-          echo "Please approve this step to deploy to production."
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
