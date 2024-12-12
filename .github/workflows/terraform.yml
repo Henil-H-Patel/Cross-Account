@@ -125,7 +125,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: tfstate
-        path: ./terraform.tfstate
+        path: terraform.tfstate
 
     - name: Terraform Init
       run: terraform init
