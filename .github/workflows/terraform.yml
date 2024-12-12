@@ -6,7 +6,7 @@ on:
     - main
 
 jobs:
-  terraform-init-plan:
+  terraform-init-plan-development:
     name: Terraform Init and Plan (Development)
     runs-on: ubuntu-latest
 
@@ -19,7 +19,7 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Configure AWS credentials for Development
+    - name: Configure AWS Credentials for Development
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: AKIAQ3EGTMUFJ6OTA2EQ
@@ -35,24 +35,21 @@ jobs:
     - name: Upload Terraform Plan
       uses: actions/upload-artifact@v3
       with:
-        name: tfplan
+        name: tfplan-dev
         path: tfplan
 
-  approval-apply-development:
-    name: Approval for Terraform Apply (Development)
-    needs: terraform-init-plan
+  terraform-apply-approval-development:
+    name: Terraform Apply Approval (Development)
+    needs: terraform-init-plan-development
     runs-on: ubuntu-latest
-    environment:
-      name: approval
-      url: https://github.com/${{ github.repository }}/environments/approval
 
     steps:
     - name: Wait for Manual Approval
-      run: echo "Waiting for manual approval to apply the Terraform plan."
+      run: echo "Awaiting manual approval for Terraform Apply (Development)."
 
   terraform-apply-development:
     name: Terraform Apply (Development)
-    needs: approval-apply-development
+    needs: terraform-apply-approval-development
     runs-on: ubuntu-latest
 
     steps:
@@ -64,7 +61,7 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Configure AWS credentials for Development
+    - name: Configure AWS Credentials for Development
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: AKIAQ3EGTMUFJ6OTA2EQ
@@ -74,37 +71,26 @@ jobs:
     - name: Download Terraform Plan
       uses: actions/download-artifact@v3
       with:
-        name: tfplan
+        name: tfplan-dev
 
     - name: Terraform Init
       run: terraform init
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve tfplan
+      run: terraform apply -auto-approve tfplan-dev
 
-  approval-destroy-development:
-    name: Approval for Terraform Destroy (Development)
-    needs: terraform-init-plan
+  terraform-destroy-approval-development:
+    name: Terraform Destroy Approval (Development)
+    needs: terraform-apply-development
     runs-on: ubuntu-latest
 
     steps:
-    - name: Approval for Terraform Destroy
-      id: approval
-      uses: hmarr/auto-approve-action@v2 # Optional, for automation
-      with:
-        message: "Choose an option: Approve to destroy or Reject to proceed with Production deployment."
-        approval-required: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Set Decision Output
-      run: echo "::set-output name=decision::${{ steps.approval.outputs.result }}"
-      id: decision-output
+    - name: Wait for Manual Approval to Destroy
+      run: echo "Awaiting manual approval for Terraform Destroy (Development)."
 
   terraform-destroy-development:
     name: Terraform Destroy (Development)
-    needs: approval-destroy-development
-    if: needs.approval-destroy-development.outputs.decision == 'approve'
+    needs: terraform-destroy-approval-development
     runs-on: ubuntu-latest
 
     steps:
@@ -116,17 +102,12 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Configure AWS credentials for Development
+    - name: Configure AWS Credentials for Development
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: AKIAQ3EGTMUFJ6OTA2EQ
         aws-secret-access-key: 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
         aws-region: us-west-2
-
-    - name: Download Terraform State
-      uses: actions/download-artifact@v3
-      with:
-        name: tfstate
 
     - name: Terraform Init
       run: terraform init
@@ -136,9 +117,9 @@ jobs:
 
   terraform-init-plan-production:
     name: Terraform Init and Plan (Production)
-    needs: approval-destroy-development
-    if: needs.approval-destroy-development.outputs.decision == 'reject'
+    needs: terraform-destroy-approval-development
     runs-on: ubuntu-latest
+    if: ${{ needs.terraform-destroy-approval-development.result == 'success' }} # Ensure it only runs if approval is given
 
     steps:
     - name: Checkout Code
@@ -149,7 +130,7 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Configure AWS credentials for Production
+    - name: Configure AWS Credentials for Production
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: AKIAV4QJD2BQ7WYY5EVZ
@@ -168,21 +149,18 @@ jobs:
         name: tfplan-prod
         path: tfplan
 
-  approval-apply-production:
-    name: Approval for Terraform Apply (Production)
+  terraform-apply-approval-production:
+    name: Terraform Apply Approval (Production)
     needs: terraform-init-plan-production
     runs-on: ubuntu-latest
-    environment:
-      name: approval
-      url: https://github.com/${{ github.repository }}/environments/approval
 
     steps:
     - name: Wait for Manual Approval
-      run: echo "Waiting for manual approval to apply the Terraform plan for Production."
+      run: echo "Awaiting manual approval for Terraform Apply (Production)."
 
   terraform-apply-production:
     name: Terraform Apply (Production)
-    needs: approval-apply-production
+    needs: terraform-apply-approval-production
     runs-on: ubuntu-latest
 
     steps:
@@ -194,7 +172,7 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Configure AWS credentials for Production
+    - name: Configure AWS Credentials for Production
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: AKIAV4QJD2BQ7WYY5EVZ
@@ -210,24 +188,20 @@ jobs:
       run: terraform init
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve tfplan
+      run: terraform apply -auto-approve tfplan-prod
 
-  approval-destroy-production:
-    name: Approval for Terraform Destroy (Production)
+  terraform-destroy-approval-production:
+    name: Terraform Destroy Approval (Production)
     needs: terraform-apply-production
     runs-on: ubuntu-latest
-    environment:
-      name: approval
-      url: https://github.com/${{ github.repository }}/environments/approval
 
     steps:
     - name: Wait for Manual Approval to Destroy
-      run: echo "Please approve to destroy the Production environment."
+      run: echo "Awaiting manual approval for Terraform Destroy (Production)."
 
   terraform-destroy-production:
     name: Terraform Destroy (Production)
-    needs: approval-destroy-production
-    if: github.event.decision == 'approve'
+    needs: terraform-destroy-approval-production
     runs-on: ubuntu-latest
 
     steps:
@@ -239,17 +213,12 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Configure AWS credentials for Production
+    - name: Configure AWS Credentials for Production
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: AKIAV4QJD2BQ7WYY5EVZ
         aws-secret-access-key: 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
         aws-region: us-east-1
-
-    - name: Download Terraform State
-      uses: actions/download-artifact@v3
-      with:
-        name: tfstate-prod
 
     - name: Terraform Init
       run: terraform init
