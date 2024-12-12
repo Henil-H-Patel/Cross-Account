@@ -84,7 +84,7 @@ jobs:
 
   terraform-destroy-approval-development:
     name: Approval for Terraform destroy (Development)
-    needs: terraform-init-plan
+    needs: terraform-apply-development
     runs-on: ubuntu-latest
     environment:
       name: approval
