@@ -101,7 +101,6 @@ jobs:
   terraform-destroy-development:
     name: Terraform Destroy (Development)
     needs: approval-destroy-development
-    if: needs.approval-destroy-development.outputs.decision == 'approve'
     runs-on: ubuntu-latest
 
     steps:
@@ -223,7 +222,6 @@ jobs:
   terraform-destroy-production:
     name: Terraform Destroy (Development)
     needs: approval-destroy-production
-    if: needs.approval-destroy-development.outputs.decision == 'approve'
     runs-on: ubuntu-latest
 
     steps:
