@@ -230,3 +230,34 @@ jobs:
       run: echo "Please approve to destroy the Production environment."
 
   terraform-destroy-production:
+    name: Terraform Destroy (Production)
+    needs: approval-destroy-production
+    if: github.event.decision == 'approve' # Runs only if approved
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Configure AWS credentials for Production
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: AKIAV4QJD2BQ7WYY5EVZ
+        aws-secret-access-key: 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
+        aws-region: us-east-1
+
+    - name: Download Terraform State
+      uses: actions/download-artifact@v3
+      with:
+        name: tfstate-prod
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
