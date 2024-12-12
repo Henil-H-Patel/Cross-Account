@@ -118,7 +118,7 @@ jobs:
     - name: Download Terraform State
       uses: actions/download-artifact@v3
       with:
-        name: tfstate
+        name: tfplan
 
     - name: Terraform Init
       run: terraform init
