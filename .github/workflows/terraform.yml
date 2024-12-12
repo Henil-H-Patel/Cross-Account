@@ -82,8 +82,14 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan
 
+    - name: Upload Terraform State
+      uses: actions/upload-artifact@v3
+      with:
+        name: tfstate
+        path: terraform.tfstate
+
   approval-destroy-development:
-    name: Approval for Terraform Apply (Development)
+    name: Approval for Terraform Destroy (Development)
     needs: terraform-apply-development
     runs-on: ubuntu-latest
     environment:
@@ -118,7 +124,8 @@ jobs:
     - name: Download Terraform State
       uses: actions/download-artifact@v3
       with:
-        name: tfplan
+        name: tfstate
+        path: ./terraform.tfstate
 
     - name: Terraform Init
       run: terraform init
