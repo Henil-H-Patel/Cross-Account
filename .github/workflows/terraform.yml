@@ -75,7 +75,6 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: tfplan
-        path: tfplan
 
     - name: Terraform Init
       run: terraform init
@@ -120,7 +119,6 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: tfplan
-        path: tfplan
 
     - name: Terraform Init
       run: terraform init
