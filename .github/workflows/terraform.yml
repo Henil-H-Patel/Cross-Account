@@ -34,6 +34,10 @@ jobs:
       working-directory: .
       run: terraform plan -out=tfplan
 
+    - name: Terraform Apply
+      working-directory: .
+      run: terraform apply -auto-approve tfplan
+
   approval:
     name: Approval for Production Deployment
     needs: terraform-init-plan
@@ -74,5 +78,9 @@ jobs:
       run: terraform init
 
     - name: Apply Terraform Plan
+      working-directory: .
+      run: terraform apply -auto-approve tfplan
+
+    - name: Terraform Apply
       working-directory: .
       run: terraform apply -auto-approve tfplan
