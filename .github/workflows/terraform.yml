@@ -84,20 +84,27 @@ jobs:
 
   approval-destroy-development:
     name: Approval for Terraform Destroy (Development)
-    needs: terraform-apply-development
+    needs: terraform-init-plan
     runs-on: ubuntu-latest
-    environment:
-      name: approval
-      url: https://github.com/${{ github.repository }}/environments/approval
 
     steps:
-    - name: Wait for Manual Approval to Destroy or Proceed
-      run: echo "Please approve to either destroy the infrastructure or continue with production deployment."
+    - name: Approval for Terraform Destroy
+      id: approval
+      uses: hmarr/auto-approve-action@v2 # Optional, for automation
+      with:
+        message: "Choose an option: Approve to destroy or Reject to proceed with Production deployment."
+        approval-required: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set Decision Output
+      run: echo "::set-output name=decision::${{ steps.approval.outputs.result }}"
+      id: decision-output
 
   terraform-destroy-development:
     name: Terraform Destroy (Development)
     needs: approval-destroy-development
-    if: github.event.decision == 'approve'
+    if: needs.approval-destroy-development.outputs.decision == 'approve'
     runs-on: ubuntu-latest
 
     steps:
@@ -130,7 +137,7 @@ jobs:
   terraform-init-plan-production:
     name: Terraform Init and Plan (Production)
     needs: approval-destroy-development
-    if: github.event.decision == 'deny'
+    if: needs.approval-destroy-development.outputs.decision == 'reject'
     runs-on: ubuntu-latest
 
     steps:
