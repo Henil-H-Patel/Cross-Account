@@ -7,7 +7,7 @@ on:
 
 jobs:
   terraform-init-plan:
-    name: Terraform Init and Plan
+    name: Terraform Init and Plan (Development)
     runs-on: ubuntu-latest
 
     steps:
@@ -38,8 +38,8 @@ jobs:
         name: tfplan
         path: tfplan
 
-  approval-apply:
-    name: Approval for Terraform Apply
+  approval-apply-development:
+    name: Approval for Terraform Apply (Development)
     needs: terraform-init-plan
     runs-on: ubuntu-latest
     environment:
@@ -50,9 +50,9 @@ jobs:
     - name: Wait for Manual Approval
       run: echo "Waiting for manual approval to apply the Terraform plan."
 
-  terraform-apply:
-    name: Terraform Apply
-    needs: approval-apply
+  terraform-apply-development:
+    name: Terraform Apply (Development)
+    needs: approval-apply-development
     runs-on: ubuntu-latest
 
     steps:
@@ -82,15 +82,9 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan
 
-    - name: Upload Terraform State
-      uses: actions/upload-artifact@v3
-      with:
-        name: tfstate
-        path: "*.tfstate"
-
-  approval-destroy:
-    name: Approval for Terraform Destroy
-    needs: terraform-apply
+  approval-destroy-development:
+    name: Approval for Terraform Destroy (Development)
+    needs: terraform-apply-development
     runs-on: ubuntu-latest
     environment:
       name: approval
@@ -101,8 +95,8 @@ jobs:
       run: echo "Please approve to either destroy the infrastructure or continue with production deployment."
 
   terraform-destroy-development:
-    name: Terraform Destroy
-    needs: approval-destroy
+    name: Terraform Destroy (Development)
+    needs: approval-destroy-development
     if: github.event.decision == 'approve'
     runs-on: ubuntu-latest
 
@@ -136,7 +130,7 @@ jobs:
   terraform-init-plan-production:
     name: Terraform Init and Plan (Production)
     needs: approval-destroy-development
-    if: github.event.decision == 'deny' # Runs only if denied
+    if: github.event.decision == 'deny'
     runs-on: ubuntu-latest
 
     steps:
@@ -211,12 +205,6 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan
 
-    - name: Upload Terraform State
-      uses: actions/upload-artifact@v3
-      with:
-        name: tfstate-prod
-        path: "*.tfstate"
-
   approval-destroy-production:
     name: Approval for Terraform Destroy (Production)
     needs: terraform-apply-production
@@ -232,7 +220,7 @@ jobs:
   terraform-destroy-production:
     name: Terraform Destroy (Production)
     needs: approval-destroy-production
-    if: github.event.decision == 'approve' # Runs only if approved
+    if: github.event.decision == 'approve'
     runs-on: ubuntu-latest
 
     steps:
