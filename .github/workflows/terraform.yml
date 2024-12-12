@@ -123,7 +123,7 @@ jobs:
 
   terraform-init-plan-production:
     name: Terraform Init and Plan (Production)
-    needs: terraform-destroy-approval-development
+    # needs: terraform-destroy-approval-development
     runs-on: ubuntu-latest
     if: ${{ needs.terraform-destroy-approval-development.result == 'success' }} # Ensure it only runs if approval is given
 
