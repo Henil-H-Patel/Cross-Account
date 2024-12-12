@@ -38,14 +38,17 @@ jobs:
         name: tfplan-dev
         path: tfplan
 
-  terraform-apply-approval-development:
-    name: Terraform Apply Approval (Development)
-    needs: terraform-init-plan-development
+  approval-apply-development:
+    name: Approval for Terraform Apply (Development)
+    needs: terraform-init-plan
     runs-on: ubuntu-latest
+    environment:
+      name: approval
+      url: https://github.com/${{ github.repository }}/environments/approval
 
     steps:
     - name: Wait for Manual Approval
-      run: echo "Awaiting manual approval for Terraform Apply (Development)."
+      run: echo "Waiting for manual approval to apply the Terraform plan."
 
   terraform-apply-development:
     name: Terraform Apply (Development)
@@ -80,13 +83,16 @@ jobs:
       run: terraform apply -auto-approve tfplan-dev
 
   terraform-destroy-approval-development:
-    name: Terraform Destroy Approval (Development)
-    needs: terraform-apply-development
+    name: Approval for Terraform destroy (Development)
+    needs: terraform-init-plan
     runs-on: ubuntu-latest
+    environment:
+      name: approval
+      url: https://github.com/${{ github.repository }}/environments/approval
 
     steps:
-    - name: Wait for Manual Approval to Destroy
-      run: echo "Awaiting manual approval for Terraform Destroy (Development)."
+    - name: Wait for Manual Approval
+      run: echo "Waiting for manual approval to apply the Terraform Destroy."
 
   terraform-destroy-development:
     name: Terraform Destroy (Development)
