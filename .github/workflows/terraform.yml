@@ -52,7 +52,7 @@ jobs:
 
   terraform-apply-development:
     name: Terraform Apply (Development)
-    needs: terraform-apply-approval-development
+    needs: approval-apply-development
     runs-on: ubuntu-latest
 
     steps:
