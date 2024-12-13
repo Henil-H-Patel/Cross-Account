@@ -3,7 +3,9 @@ name: Terraform CI/CD Pipeline
 on:
   push:
     branches:
-      - main
+    - main
+  workflow_dispatch:
+
 
 jobs:
   terraform-init-plan:
@@ -11,32 +13,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.0
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
 
-      - name: Configure AWS credentials for Development
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-          aws-region: us-west-2
+    - name: Configure AWS credentials for Development
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: us-west-2
 
-      - name: Terraform Init
-        run: terraform init
+    - name: Terraform Init
+      run: terraform init
 
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
 
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v3
-        with:
-          name: tfplan
-          path: tfplan
+    - name: Upload Terraform Plan
+      uses: actions/upload-artifact@v3
+      with:
+        name: tfplan
+        path: tfplan
 
   approval-apply:
     name: Approval for Terraform Apply
@@ -47,8 +49,8 @@ jobs:
       url: https://github.com/${{ github.repository }}/environments/approval
 
     steps:
-      - name: Wait for Manual Approval
-        run: echo "Waiting for manual approval to apply the Terraform plan."
+    - name: Wait for Manual Approval
+      run: echo "Waiting for manual approval to apply the Terraform plan."
 
   terraform-apply:
     name: Terraform Apply
@@ -56,37 +58,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.0
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
 
-      - name: Configure AWS credentials for Development
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-          aws-region: us-west-2
+    - name: Configure AWS credentials for Development
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: us-west-2
 
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v3
-        with:
-          name: tfplan
+    - name: Download Terraform Plan
+      uses: actions/download-artifact@v3
+      with:
+        name: tfplan
 
-      - name: Terraform Init
-        run: terraform init
+    - name: Terraform Init
+      run: terraform init
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
 
-      - name: Upload Terraform State
-        uses: actions/upload-artifact@v3
-        with:
-          name: tfstate
-          path: "*.tfstate"
+    - name: Upload Terraform State
+      uses: actions/upload-artifact@v3
+      with:
+        name: tfstate
+        path: "*.tfstate"
 
   approval-destroy:
     name: Approval for Terraform Destroy
@@ -97,8 +99,8 @@ jobs:
       url: https://github.com/${{ github.repository }}/environments/approval
 
     steps:
-      - name: Wait for Manual Approval to Destroy or Proceed
-        run: echo "Please approve to either destroy the infrastructure or continue with production deployment."
+    - name: Wait for Manual Approval to Destroy or Proceed
+      run: echo "Please approve to either destroy the infrastructure or continue with production deployment."
 
   terraform-destroy:
     name: Terraform Destroy
@@ -106,28 +108,154 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.0
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
 
-      - name: Configure AWS credentials for Development
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
-          aws-region: us-west-2
+    - name: Configure AWS credentials for Development
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+        aws-region: us-west-2
 
-      - name: Download Terraform State
-        uses: actions/download-artifact@v3
-        with:
-          name: tfstate
+    - name: Download Terraform State
+      uses: actions/download-artifact@v3
+      with:
+        name: tfstate
 
-      - name: Terraform Init
-        run: terraform init
+    - name: Terraform Init
+      run: terraform init
 
-      - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
+
+  terraform-init-plan-production:
+    name: Terraform Init and Plan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Configure AWS credentials for Development
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: us-west-2
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
+
+    - name: Upload Terraform Plan
+      uses: actions/upload-artifact@v3
+      with:
+        name: tfplan
+        path: tfplan
+
+  approval-apply-production:
+    name: Approval for Terraform Apply
+    needs: terraform-init-plan-production
+    runs-on: ubuntu-latest
+    environment:
+      name: approval
+      url: https://github.com/${{ github.repository }}/environments/approval
+
+    steps:
+    - name: Wait for Manual Approval
+      run: echo "Waiting for manual approval to apply the Terraform plan."
+
+  terraform-apply-production:
+    name: Terraform Apply
+    needs: approval-apply-production
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Configure AWS credentials for Development
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: us-west-2
+
+    - name: Download Terraform Plan
+      uses: actions/download-artifact@v3
+      with:
+        name: tfplan
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+
+    - name: Upload Terraform State
+      uses: actions/upload-artifact@v3
+      with:
+        name: tfstate
+        path: "*.tfstate"
+
+  approval-destroy-production:
+    name: Approval for Terraform Destroy
+    needs: terraform-apply-production
+    runs-on: ubuntu-latest
+    environment:
+      name: approval
+      url: https://github.com/${{ github.repository }}/environments/approval
+
+    steps:
+    - name: Wait for Manual Approval to Destroy or Proceed
+      run: echo "Please approve to either destroy the infrastructure or continue with production deployment."
+
+  terraform-destroy-production:
+    name: Terraform Destroy
+    needs: approval-destroy-production
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    - name: Configure AWS credentials for Development
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+        aws-region: us-west-2
+
+    - name: Download Terraform State
+      uses: actions/download-artifact@v3
+      with:
+        name: tfstate
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
