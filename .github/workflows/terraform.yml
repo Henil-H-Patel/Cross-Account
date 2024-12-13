@@ -9,7 +9,7 @@ on:
 
 jobs:
   terraform-init-plan:
-    name: Terraform Init and Plan
+    name: Terraform Init and Plan(Development)
     runs-on: ubuntu-latest
 
     steps:
@@ -37,7 +37,7 @@ jobs:
     - name: Upload Terraform Plan
       uses: actions/upload-artifact@v3
       with:
-        name: tfplan
+        name: tfplan-dev
         path: tfplan
 
   approval-apply:
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: approval
-      url: https://github.com/${{ github.repository }}/environments/approval
+      url: https://github.com/${{ github.repository }}/environments/approval-dev
 
     steps:
     - name: Wait for Manual Approval
@@ -76,7 +76,7 @@ jobs:
     - name: Download Terraform Plan
       uses: actions/download-artifact@v3
       with:
-        name: tfplan
+        name: tfplan-dev
 
     - name: Terraform Init
       run: terraform init
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: approval
-      url: https://github.com/${{ github.repository }}/environments/approval
+      url: https://github.com/${{ github.repository }}/environments/approval-dev
 
     steps:
     - name: Wait for Manual Approval to Destroy or Proceed
@@ -126,7 +126,7 @@ jobs:
     - name: Download Terraform State
       uses: actions/download-artifact@v3
       with:
-        name: tfstate
+        name: tfstate-dev
 
     - name: Terraform Init
       run: terraform init
@@ -135,7 +135,7 @@ jobs:
       run: terraform destroy -auto-approve
 
   terraform-init-plan-production:
-    name: Terraform Init and Plan
+    name: Terraform Init and Plan (Production)
     runs-on: ubuntu-latest
 
     steps:
@@ -147,7 +147,7 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Configure AWS credentials for Development
+    - name: Configure AWS credentials for Production
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
@@ -163,7 +163,7 @@ jobs:
     - name: Upload Terraform Plan
       uses: actions/upload-artifact@v3
       with:
-        name: tfplan
+        name: tfplan-prod
         path: tfplan
 
   approval-apply-production:
@@ -172,7 +172,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: approval
-      url: https://github.com/${{ github.repository }}/environments/approval
+      url: https://github.com/${{ github.repository }}/environments/approval-prod
 
     steps:
     - name: Wait for Manual Approval
@@ -222,7 +222,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: approval
-      url: https://github.com/${{ github.repository }}/environments/approval
+      url: https://github.com/${{ github.repository }}/environments/approval-prod
 
     steps:
     - name: Wait for Manual Approval to Destroy or Proceed
@@ -252,7 +252,7 @@ jobs:
     - name: Download Terraform State
       uses: actions/download-artifact@v3
       with:
-        name: tfstate
+        name: tfstate-prod
 
     - name: Terraform Init
       run: terraform init
