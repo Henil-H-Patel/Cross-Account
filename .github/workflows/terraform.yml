@@ -45,7 +45,7 @@ jobs:
     needs: terraform-init-plan
     runs-on: ubuntu-latest
     environment:
-      name: approval
+      name: approval-dev
       url: https://github.com/${{ github.repository }}/environments/approval-dev
 
     steps:
@@ -87,7 +87,7 @@ jobs:
     - name: Upload Terraform State
       uses: actions/upload-artifact@v3
       with:
-        name: tfstate
+        name: tfstate-dev
         path: "*.tfstate"
 
   approval-destroy:
@@ -95,7 +95,7 @@ jobs:
     needs: terraform-apply
     runs-on: ubuntu-latest
     environment:
-      name: approval
+      name: approval-dev
       url: https://github.com/${{ github.repository }}/environments/approval-dev
 
     steps:
@@ -171,7 +171,7 @@ jobs:
     needs: terraform-init-plan-production
     runs-on: ubuntu-latest
     environment:
-      name: approval
+      name: approval-prod
       url: https://github.com/${{ github.repository }}/environments/approval-prod
 
     steps:
@@ -202,7 +202,7 @@ jobs:
     - name: Download Terraform Plan
       uses: actions/download-artifact@v3
       with:
-        name: tfplan
+        name: tfplan-prod
 
     - name: Terraform Init
       run: terraform init
@@ -213,7 +213,7 @@ jobs:
     - name: Upload Terraform State
       uses: actions/upload-artifact@v3
       with:
-        name: tfstate
+        name: tfstate-prod
         path: "*.tfstate"
 
   approval-destroy-production:
@@ -221,7 +221,7 @@ jobs:
     needs: terraform-apply-production
     runs-on: ubuntu-latest
     environment:
-      name: approval
+      name: approval-prod
       url: https://github.com/${{ github.repository }}/environments/approval-prod
 
     steps:
